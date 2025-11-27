@@ -1,7 +1,6 @@
 version: '3.9'
 
 services:
-  # 1. Base de données PostgreSQL
   db:
     image: postgres:15-alpine
     container_name: postgres_db
@@ -12,9 +11,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data
 
-  # 2. Backend FastAPI
   backend:
     build:
       context: ./backend
@@ -25,13 +23,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./backend/app:/app/app
     depends_on:
       - db
-
-  # 3. Frontend Next.js (Ajouté plus tard)
-  # frontend:
-  #   ...
 
 volumes:
   postgres_data:
