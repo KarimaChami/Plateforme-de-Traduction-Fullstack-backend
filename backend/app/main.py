@@ -20,10 +20,11 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 # Allow Swagger (or any front-end) to call your API
 origins = [
-    "http://localhost",
-    "http://127.0.0.1:8000",
-    # you can add your frontend domain if needed
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://172.18.80.1:3000",
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,21 +38,20 @@ app.add_middleware(
 
 
 
-# --- Endpoint POST /register ---
-@app.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
+@app.post("/register", response_model=Token)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = get_user_by_username(db, username=user.username)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    
-    # Création de l'utilisateur
+    existing_user = get_user_by_username(db, user.username)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+
     new_user = create_user(db, user)
 
-    # Connexion automatique après l'inscription
-    access_token = create_access_token(
-        data={"sub": new_user.username}, expires_delta=timedelta(minutes=30)
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+    access_token = create_access_token({"sub": new_user.username})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 @app.post("/login")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -66,8 +66,15 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# --- Endpoint POST /translate ---
 @app.post('/translate')
-async def translate(request:TranslationRequest,token:str= Depends(get_current_user)):
-   response = await translate_text(request.text,request.direction)
-   return response 
+async def translate(request: TranslationRequest, token: str = Depends(get_current_user)):
+    raw_response = await translate_text(request.text, request.direction)
+
+    # Vérifier les différentes clés possibles
+    if isinstance(raw_response, list) and len(raw_response) > 0:
+        first_item = raw_response[0]
+        translated_text = first_item.get('generated_text') or first_item.get('translation_text') or str(first_item)
+    else:
+        translated_text = str(raw_response)
+
+    return {"translated_text": translated_text}
