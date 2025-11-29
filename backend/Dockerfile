@@ -1,20 +1,29 @@
 # Étape 1 : Build stage
-FROM python:3.11-slim
+FROM python:3.11
 
 WORKDIR /app
 
-# Copier les fichiers de dépendances
 COPY requirements.txt .
 
-# Installer les dépendances
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copier le code
+
+#Le premier ./app → chemin dans ton projet local (la source)/Le deuxième ./app → chemin dans le conteneur Docker (la destination).
 COPY ./app ./app
 
-# Exposer le port
-# EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-# Commande pour lancer l'application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+FROM python:3.11
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn","main:app","--host","0.0.0.0" , "--port", "8000"]
