@@ -6,3 +6,6 @@ psycopg2-binary
 python-jose[cryptography]
 passlib[bcrypt]
 httpx
+python-multipart
+argon2-cffi
+

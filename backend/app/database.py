@@ -10,7 +10,7 @@ load_dotenv()  # Charger les variables d'environnement depuis le fichier .env
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_DB = os.getenv("POSTGRES_DB")
-DB_HOST = os.getenv("DB_HOST", "localhost")  # Nom du service Docker par défaut
+DB_HOST = os.getenv("DB_HOST", "postgres_db")  # Nom du service Docker par défaut
 DB_PORT = os.getenv("DB_PORT", "5432")
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:{DB_PORT}/{POSTGRES_DB}"
