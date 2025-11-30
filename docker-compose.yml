@@ -32,11 +32,15 @@ services:
 
   frontend:
     build:
-      context: ./translation-frontend
+      context: ../Plateforme-de-Traduction-Fullstack-frontend/translation-frontend
       dockerfile: Dockerfile
     container_name: next_frontend
     ports:
       - "3000:3000"
+    environment:
+    - NEXT_PUBLIC_API_URL=http://backend:8000
+    env_file:
+    - ../Plateforme-de-Traduction-Fullstack-frontend/translation-frontend/.env.local
     depends_on:
       - backend
     command: npm run dev
